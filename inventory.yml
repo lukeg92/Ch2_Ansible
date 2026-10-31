@@ -1,0 +1,20 @@
+---
+all:
+  children:
+    switches:
+      hosts:
+        Collapsed-Core-Switch-1:
+          ansible_host: 192.168.200.150
+        Collapsed-Core-Switch-2:
+          ansible_host: 192.168.200.151
+        Access-Switch-1:
+          ansible_host: 192.168.200.152
+        Access-Switch-2:
+          ansible_host: 192.168.200.153
+
+  vars:
+    ansible_connection: network_cli
+    ansible_network_os: ios
+    ansible_user: "{{ LAB_USER }}"
+    ansible_password: "{{ LAB_PASSWORD }}"
+    ansible_secret: "{{ LAB_SECRET }}"
