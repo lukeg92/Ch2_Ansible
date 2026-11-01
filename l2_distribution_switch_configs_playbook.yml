@@ -1,0 +1,33 @@
+---
+- name: Configure Layer 2 technologies on distribution switches - technologies covered in ENCOR blueprint
+  hosts: distribution_switches
+  gather_facts: false
+  vars_files:
+    vault.yml 
+  
+  tasks:
+    - name: configure trunk port on Eth1/1 to access switches and Eth0/1-2 Etherchannel links
+      cisco.ios.ios_l2_interfaces:
+        config:
+          - name: "{{ item }}"
+            mode: trunk
+            trunk:
+              allowed_vlans: 10,11,12,13,20,30
+              native_vlan: 10
+              encapsulation: dot1q
+      loop:
+        - Ethernet1/1
+        - Ethernet0/1 
+        - Ethernet0/2
+
+    - name: Configure LACP Etherchannel between distribution switches
+      cisco.ios.ios_lag_interfaces:
+        config:
+          - name: Port-channel10
+            members:
+              - member: "{{ item }}"
+                mode: active
+      loop:
+        - Ethernet0/1
+        - Ethernet0/2 
+

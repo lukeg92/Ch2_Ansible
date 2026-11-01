@@ -3,14 +3,22 @@ all:
   children:
     switches:
       hosts:
-        Collapsed-Core-Switch-1:
+        Collapsed_Core_Switch_1:
           ansible_host: 192.168.200.150
-        Collapsed-Core-Switch-2:
+        Collapsed_Core_Switch_2:
           ansible_host: 192.168.200.151
-        Access-Switch-1:
+        Access_Switch_1:
           ansible_host: 192.168.200.152
-        Access-Switch-2:
+        Access_Switch_2:
           ansible_host: 192.168.200.153
+    access_switches:
+      hosts:
+        Access_Switch_1: {}
+        Access_Switch_2: {}
+    distribution_switches:
+      hosts:
+        Collapsed_Core_Switch_1: {}
+        Collapsed_Core_Switch_2: {}
 
   vars:
     ansible_connection: network_cli
