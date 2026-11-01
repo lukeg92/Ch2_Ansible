@@ -4,6 +4,12 @@ stages:
   - test
   - deploy
 
+# Global variables used across pipeline jobs
+variables:
+  # This points the runner directly to your custom virtual environment binary
+  ANSIBLE_RUNNER: "/home/luke/AUTOCOR/Ch2_Ansible/.venv/bin/ansible-playbook"
+  ANSIBLE_FORCE_COLOR: "True"
+
 # 2. Syntax Check: Validates your Ansible code structure before running it
 ansible_syntax_check:
   stage: lint
