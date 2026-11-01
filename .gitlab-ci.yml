@@ -8,6 +8,13 @@ variables:
   # This points the runner directly to your custom virtual environment binary
   ANSIBLE_RUNNER: "/home/gitlab-runner/.venvs/ansible/bin/ansible-playbook"
   ANSIBLE_FORCE_COLOR: "True"
+  
+  # Map your GitLab UI secret variables directly to standard Ansible connection variables
+  ANSIBLE_NET_USERNAME: "$LAB_USER"
+  ANSIBLE_NET_PASSWORD: "$LAB_PASSWORD"
+  
+  # If your switches require an "enable" password, map LAB_SECRET to the privilege variable
+  ANSIBLE_NET_AUTH_PASS: "$LAB_SECRET"
 
 # 1. Syntax Check: Validates your Ansible code structure
 ansible_syntax_check:
