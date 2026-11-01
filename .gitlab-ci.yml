@@ -1,0 +1,39 @@
+# 1. Define the order of your pipeline operations
+stages:
+  - lint
+  - test
+  - deploy
+
+# 2. Syntax Check: Validates your Ansible code structure before running it
+ansible_syntax_check:
+  stage: lint
+  tags:
+    - cml-runner  # This matches the exact tag you gave your runner!
+  script:
+    - echo "Verifying Ansible playbook syntax..."
+    - ansible-playbook --syntax-check -i inventory.yml task.yml
+
+# 3. Dry Run: Simulates the changes against your CML nodes without changing state
+ansible_dry_run:
+  stage: test
+  tags:
+    - cml-runner
+  script:
+    - echo "Executing dry-run simulation against CML lab..."
+    - ansible-playbook -i inventory.yml l2_access_switch_configs_playbook.yml --check --diff
+  # Run this test on every branch change *except* when merging into main
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+
+# 4. Production Push: Applies the changes completely to your CML network devices
+cml_live_deploy:
+  stage: deploy
+  tags:
+    - cml-runner
+  script:
+    - echo "Deploying active network configuration updates..."
+    - ansible-playbook -i inventory.yml l2_access_switch_configs_playbook.yml
+  # Guardrails: Only run if code hits the main branch, and require a manual click to execute
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
