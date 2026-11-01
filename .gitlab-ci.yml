@@ -5,16 +5,8 @@ stages:
 
 # Global variables used across pipeline jobs
 variables:
-  # This points the runner directly to your custom virtual environment binary
   ANSIBLE_RUNNER: "/home/gitlab-runner/.venvs/ansible/bin/ansible-playbook"
   ANSIBLE_FORCE_COLOR: "True"
-  
-  # Map your GitLab UI secret variables directly to standard Ansible connection variables
-  ANSIBLE_NET_USERNAME: "$LAB_USER"
-  ANSIBLE_NET_PASSWORD: "$LAB_PASSWORD"
-  
-  # If your switches require an "enable" password, map LAB_SECRET to the privilege variable
-  ANSIBLE_NET_AUTH_PASS: "$LAB_SECRET"
 
 # 1. Syntax Check: Validates your Ansible code structure
 ansible_syntax_check:
@@ -23,7 +15,8 @@ ansible_syntax_check:
     - cml-runner
   script:
     - echo "Verifying Ansible playbook syntax..."
-    - $ANSIBLE_RUNNER --syntax-check -i inventory.yml task.yml
+    # Explicitly feed the parameters inline so the inventory parser can see them
+    - $ANSIBLE_RUNNER --syntax-check -i inventory.yml task.yml -e "LAB_USER=$LAB_USER LAB_PASSWORD=$LAB_PASSWORD LAB_SECRET=$LAB_SECRET"
 
 # 2. Dry Run: Simulates the changes against your CML nodes without changing state
 ansible_dry_run:
@@ -32,7 +25,7 @@ ansible_dry_run:
     - cml-runner
   script:
     - echo "Executing dry-run simulation against CML lab..."
-    - $ANSIBLE_RUNNER -i inventory.yml task.yml --check --diff
+    - $ANSIBLE_RUNNER -i inventory.yml task.yml --check --diff -e "LAB_USER=$LAB_USER LAB_PASSWORD=$LAB_PASSWORD LAB_SECRET=$LAB_SECRET"
   rules:
     - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
 
@@ -43,7 +36,8 @@ cml_live_deploy:
     - cml-runner
   script:
     - echo "Deploying active network configuration updates..."
-    - $ANSIBLE_RUNNER -i inventory.yml task.yml
+    # Inline execution block directly feeding variables to the playbook engine
+    - $ANSIBLE_RUNNER -i inventory.yml task.yml -e "LAB_USER=$LAB_USER LAB_PASSWORD=$LAB_PASSWORD LAB_SECRET=$LAB_SECRET"
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: manual
