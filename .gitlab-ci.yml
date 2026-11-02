@@ -1,43 +1,11 @@
 stages:
-  - lint
   - test
-  - deploy
 
-# Global variables used across pipeline jobs
-variables:
-  ANSIBLE_RUNNER: "/home/gitlab-runner/.venvs/ansible/bin/ansible-playbook"
-  ANSIBLE_FORCE_COLOR: "True"
-
-# 1. Syntax Check: Validates your Ansible code structure
-ansible_syntax_check:
-  stage: lint
-  tags:
-    - cml-runner
-  script:
-    - echo "Verifying Ansible playbook syntax..."
-    # Explicitly feed the parameters inline so the inventory parser can see them
-    - $ANSIBLE_RUNNER --syntax-check -i inventory.yml task.yml -e "LAB_USER=$LAB_USER LAB_PASSWORD=$LAB_PASSWORD LAB_SECRET=$LAB_SECRET"
-
-# 2. Dry Run: Simulates the changes against your CML nodes without changing state
-ansible_dry_run:
+hello_runner:
   stage: test
   tags:
-    - cml-runner
+    - cml-lab
   script:
-    - echo "Executing dry-run simulation against CML lab..."
-    - $ANSIBLE_RUNNER -i inventory.yml task.yml --check --diff -e "LAB_USER=$LAB_USER LAB_PASSWORD=$LAB_PASSWORD LAB_SECRET=$LAB_SECRET"
-  rules:
-    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
-
-# 3. Production Push: Applies the changes completely to your CML network devices
-cml_live_deploy:
-  stage: deploy
-  tags:
-    - cml-runner
-  script:
-    - echo "Deploying active network configuration updates..."
-    # Inline execution block directly feeding variables to the playbook engine
-    - $ANSIBLE_RUNNER -i inventory.yml task.yml -e "LAB_USER=$LAB_USER LAB_PASSWORD=$LAB_PASSWORD LAB_SECRET=$LAB_SECRET"
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      when: manual
+    - whoami
+    - hostname
+    - python3 --version
