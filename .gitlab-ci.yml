@@ -1,11 +1,35 @@
 stages:
-  - test
+  - validate
 
-hello_runner:
-  stage: test
+default:
   tags:
     - cml-lab
+  before_script:
+    - export PATH="$HOME/.local/bin:$PATH"
+    - rm -rf .venv
+    - uv venv .venv
+    - . .venv/bin/activate
+    - uv pip install -r requirements.txt
+    - ansible-galaxy collection install -r collections/requirements.yml -p collections
+
+variables:
+  ANSIBLE_COLLECTIONS_PATH: "$CI_PROJECT_DIR/collections"
+
+yamllint:
+  stage: validate
   script:
-    - whoami
-    - hostname
-    - python3 --version
+    - yamllint copy_run_start.yml inventory.yml l2_access_distribution_configs_playbook.yml l2_access_switch_configs_playbook.yml l2_distribution_switch_configs_playbook.yml lab_practice.yml task.yml
+
+ansible_lint:
+  stage: validate
+  script:
+    - ansible-lint copy_run_start.yml l2_access_distribution_configs_playbook.yml l2_access_switch_configs_playbook.yml l2_distribution_switch_configs_playbook.yml lab_practice.yml task.yml
+
+syntax_check:
+  stage: validate
+  script:
+    - |
+      for playbook in copy_run_start.yml l2_access_distribution_configs_playbook.yml l2_access_switch_configs_playbook.yml l2_distribution_switch_configs_playbook.yml lab_practice.yml task.yml; do
+        echo "Checking $playbook"
+        ansible-playbook -i inventory.yml "$playbook" --syntax-check
+      done
