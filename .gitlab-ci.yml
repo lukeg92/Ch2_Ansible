@@ -1,35 +1,58 @@
 stages:
   - validate
+  - lab
 
 default:
+  image: ansible-ci:1
   tags:
-    - cml-lab
+    - cml-docker
   before_script:
-    - export PATH="$HOME/.local/bin:$PATH"
-    - rm -rf .venv
-    - uv venv .venv
-    - . .venv/bin/activate
-    - uv pip install -r requirements.txt
-    - ansible-galaxy collection install -r collections/requirements.yml -p collections
-
-variables:
-  ANSIBLE_COLLECTIONS_PATH: "$CI_PROJECT_DIR/collections"
+    - mkdir -p ~/.ssh
+    - cp known_hosts ~/.ssh/known_hosts
 
 yamllint:
   stage: validate
   script:
-    - yamllint copy_run_start.yml inventory.yml l2_access_distribution_configs_playbook.yml l2_access_switch_configs_playbook.yml l2_distribution_switch_configs_playbook.yml lab_practice.yml task.yml
+    - yamllint copy_run_start.yml l2_access_distribution_configs_playbook.yml l2_access_switch_configs_playbook.yml l2_distribution_switch_configs_playbook.yml ping_test.yml inventory.yml
 
 ansible_lint:
   stage: validate
   script:
-    - ansible-lint copy_run_start.yml l2_access_distribution_configs_playbook.yml l2_access_switch_configs_playbook.yml l2_distribution_switch_configs_playbook.yml lab_practice.yml task.yml
+    - ansible-lint copy_run_start.yml l2_access_distribution_configs_playbook.yml l2_access_switch_configs_playbook.yml l2_distribution_switch_configs_playbook.yml ping_test.yml
 
 syntax_check:
   stage: validate
   script:
     - |
-      for playbook in copy_run_start.yml l2_access_distribution_configs_playbook.yml l2_access_switch_configs_playbook.yml l2_distribution_switch_configs_playbook.yml lab_practice.yml task.yml; do
+      for playbook in copy_run_start.yml l2_access_distribution_configs_playbook.yml l2_access_switch_configs_playbook.yml l2_distribution_switch_configs_playbook.yml ping_test.yml; do
         echo "Checking $playbook"
         ansible-playbook -i inventory.yml "$playbook" --syntax-check
       done
+
+connectivity:
+  stage: lab
+  script:
+    - ansible-playbook -i inventory.yml ping_test.yml
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+dry_run:
+  stage: lab
+  needs: [connectivity]
+  script:
+    - ansible-playbook -i inventory.yml l2_access_distribution_configs_playbook.yml --check --diff
+    - ansible-playbook -i inventory.yml l2_access_switch_configs_playbook.yml --check --diff
+    - ansible-playbook -i inventory.yml l2_distribution_switch_configs_playbook.yml --check --diff
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+deploy:
+  stage: lab
+  needs: [dry_run]
+  script:
+    - ansible-playbook -i inventory.yml l2_access_distribution_configs_playbook.yml
+    - ansible-playbook -i inventory.yml l2_access_switch_configs_playbook.yml
+    - ansible-playbook -i inventory.yml l2_distribution_switch_configs_playbook.yml
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
