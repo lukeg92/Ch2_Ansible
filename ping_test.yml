@@ -1,0 +1,7 @@
+---
+- name: Test connectivity to lab devices
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Ping device
+      ansible.builtin.ping:

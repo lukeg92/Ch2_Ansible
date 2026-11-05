@@ -23,6 +23,5 @@ all:
   vars:
     ansible_connection: network_cli
     ansible_network_os: ios
-    ansible_user: "{{ LAB_USER }}"
-    ansible_password: "{{ LAB_PASSWORD }}"
-    ansible_secret: "{{ LAB_SECRET }}"
+    ansible_user: "{{ lookup('env', 'LAB_USER') }}"
+    ansible_password: "{{ lookup('env', 'LAB_PASSWORD') }}"

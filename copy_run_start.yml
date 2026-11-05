@@ -2,11 +2,8 @@
 - name: Copy running config to startup config
   hosts: switches
   gather_facts: false
-  vars_files:
-    - vault.yml
 
   tasks:
-    - name: copy running config to startup config
+    - name: Copy running config to startup config
       cisco.ios.ios_config:
         save_when: modified
-

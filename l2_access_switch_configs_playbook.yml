@@ -2,11 +2,9 @@
 - name: Configure Layer 2 technologies on access switches - technologies covered in ENCOR blueprint
   hosts: access_switches
   gather_facts: false
-  vars_files:
-    - vault.yml
-  
+
   tasks:
-    - name: configure access ports #Eth1/1, 1/2, 1/3
+    - name: Configure access ports  # Eth1/1, 1/2, 1/3
       cisco.ios.ios_l2_interfaces:
         config:
           - name: Ethernet1/1
@@ -23,12 +21,12 @@
               vlan: 20
           - name: Ethernet1/3
             mode: access
-            access: 
+            access:
               vlan: 13
             voice:
               vlan: 20
 
-    - name: configure trunk ports #Eth0/1
+    - name: Configure trunk ports  # Eth0/1
       cisco.ios.ios_l2_interfaces:
         config:
           - name: Ethernet0/1
@@ -36,4 +34,4 @@
             trunk:
               allowed_vlans: 10,11,12,13,20,30
               native_vlan: 10
-              encapsulation: dot1q         
+              encapsulation: dot1q

@@ -2,8 +2,6 @@
 - name: Configure Layer 2 technologies on access and distribution switches - technologies covered in ENCOR blueprint
   hosts: switches
   gather_facts: false
-  vars_files:
-    - vault.yml
 
   tasks:
     - name: Configure VLANs on access and distribution switches
@@ -21,4 +19,3 @@
             vlan_id: 20
           - name: VIDEO_VLAN
             vlan_id: 30
-
