@@ -40,7 +40,8 @@ dry_run:
   stage: lab
   needs: [connectivity]
   script:
-    - ansible-playbook -i inventory.yml l2_access_distribution_configs_playbook.yml --check --diff
+    - for v in LAB_USER LAB_PASSWORD; do [ -n "$(printenv $v)" ] && echo "$v set" || echo "$v EMPTY"; done
+    - ansible-playbook -i inventory.yml l2_ssh access_distribution_configs_playbook.yml --check --diff
     - ansible-playbook -i inventory.yml l2_access_switch_configs_playbook.yml --check --diff
     - ansible-playbook -i inventory.yml l2_distribution_switch_configs_playbook.yml --check --diff
   rules:
