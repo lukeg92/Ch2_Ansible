@@ -3,5 +3,6 @@
   hosts: all
   gather_facts: false
   tasks:
-    - name: Ping device
-      ansible.builtin.ping:
+    - name: Check device connectivity
+      cisco.ios.ios_command:
+        commands: show clock
